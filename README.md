@@ -1,6 +1,6 @@
 # Planner
 
-Small planner project build using the MERN stack. Will be an evolving project over the next little while.
+Small planner project build using the MERN stack. Starting this as a way to get some expeerience with Express, React and Mongo.
 
 To install dependencies:
 
