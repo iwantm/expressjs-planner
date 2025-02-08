@@ -1,4 +1,4 @@
-import { DatabaseError, ProjectModel } from '../models'
+import { DatabaseError, ProjectModel, TaskModel } from '../models'
 import type { NextFunction, Request, Response } from 'express'
 
 export async function getProjects(
@@ -107,6 +107,29 @@ export async function deleteProject(
     const err = e as Error
     const error = new DatabaseError(
       `Failed to delete project with id ${req.params.id}. err: ${err.message}`,
+      err.cause
+    )
+
+    next(error)
+  }
+}
+
+export async function listTasksForProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const tasks = await TaskModel.find({ projectId: req.params.id })
+    res.json(tasks)
+    if (!tasks)
+      res
+        .status(404)
+        .json({ message: `Could not find tasks for project ${req.params.id}.` })
+  } catch (e) {
+    const err = e as Error
+    const error = new DatabaseError(
+      `Failed to tasks for project with id ${req.params.id}. err: ${err.message}`,
       err.cause
     )
 
