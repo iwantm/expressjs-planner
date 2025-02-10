@@ -1,7 +1,6 @@
-import { Schema, model, Types } from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 interface Project {
-  projectId: Types.ObjectId
   title: string
   description: string
   status: 'To Do' | 'In Progress' | 'Complete' | 'Abandoned'
@@ -27,7 +26,23 @@ const ProjectSchema = new Schema<Project>(
     },
     dueDate: Date,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 )
+
+ProjectSchema.virtual('tasks', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'projectId',
+})
+
+ProjectSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'parent',
+})
 
 export const ProjectModel = model<Project>('Project', ProjectSchema)

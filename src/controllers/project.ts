@@ -1,4 +1,4 @@
-import { DatabaseError, ProjectModel, TaskModel } from '../models'
+import { CommentModel, DatabaseError, ProjectModel } from '../models'
 import type { NextFunction, Request, Response } from 'express'
 
 export async function getProjects(
@@ -8,32 +8,34 @@ export async function getProjects(
 ) {
   try {
     const projects = await ProjectModel.find()
+
     res.json(projects)
   } catch (e) {
-    const err = e as Error
-    const error = new DatabaseError(
-      `Failed to retrieve projects: ${err.message}`,
-      err.cause
-    )
+    const error = new DatabaseError(`Failed to retrieve projects.`, e)
 
     next(error)
   }
 }
 
-export async function getProjectsById(
+export async function getProjectById(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
     const project = await ProjectModel.findById(req.params.id)
+      .populate('tasks')
+      .populate('comments')
+
     res.json(project)
   } catch (e) {
-    const err = e as Error
     const error = new DatabaseError(
-      `Failed to retrieve project with id. ${req.params.id}, err: ${err.message}`,
-      err.cause
+      `Failed to retrieve project with id. ${req.params.id}`,
+      e
     )
+    res
+      .status(404)
+      .json({ message: `Project with id ${req.params.id} not found.` })
 
     next(error)
   }
@@ -47,13 +49,10 @@ export async function createProject(
   try {
     const project = new ProjectModel(req.body)
     await project.save()
+
     res.status(201).json(project)
   } catch (e) {
-    const err = e as Error
-    const error = new DatabaseError(
-      `Failed to create project: ${err.message}`,
-      err.cause
-    )
+    const error = new DatabaseError(`Failed to create project`, e)
 
     next(error)
   }
@@ -73,18 +72,16 @@ export async function updateProject(
       }
     )
 
-    if (!project)
-      res
-        .status(404)
-        .json({ message: `Project with id ${req.params.id} not found.` })
-
     res.json(project)
   } catch (e) {
-    const err = e as Error
     const error = new DatabaseError(
-      `Failed to update project with id ${req.params.id}. err: ${err.message}`,
-      err.cause
+      `Failed to update project with id ${req.params.id}.`,
+      e
     )
+
+    res
+      .status(404)
+      .json({ message: `Project with id ${req.params.id} not found.` })
 
     next(error)
   }
@@ -96,41 +93,45 @@ export async function deleteProject(
   next: NextFunction
 ) {
   try {
-    const project = await ProjectModel.findByIdAndDelete(req.params.id)
-    if (!project)
-      res
-        .status(404)
-        .json({ message: `Project with id ${req.params.id} not found.` })
+    await ProjectModel.findByIdAndDelete(req.params.id)
 
     res.json({ message: `Project with id ${req.params.id} deleted.` })
   } catch (e) {
-    const err = e as Error
     const error = new DatabaseError(
-      `Failed to delete project with id ${req.params.id}. err: ${err.message}`,
-      err.cause
+      `Failed to delete project with id ${req.params.id}.`,
+      e
     )
+
+    res
+      .status(404)
+      .json({ message: `Project with id ${req.params.id} not found.` })
 
     next(error)
   }
 }
 
-export async function listTasksForProject(
+export async function commentProject(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const tasks = await TaskModel.find({ projectId: req.params.id })
-    res.json(tasks)
-    if (!tasks)
-      res
-        .status(404)
-        .json({ message: `Could not find tasks for project ${req.params.id}.` })
+    const project = await ProjectModel.findById(req.params.id)
+
+    const comment = new CommentModel({
+      parentType: 'Project',
+      parent: project?.id,
+      ...req.body,
+    })
+
+    await comment.save()
+    res.status(201)
+
+    res.json({ message: `Comment made on project: ${req.params.id}` })
   } catch (e) {
-    const err = e as Error
     const error = new DatabaseError(
-      `Failed to tasks for project with id ${req.params.id}. err: ${err.message}`,
-      err.cause
+      `Failed to comment on task with id ${req.params.id}.`,
+      e
     )
 
     next(error)

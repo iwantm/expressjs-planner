@@ -12,7 +12,7 @@ const { MONGO_URI } = env
 logger.info(`Starting application on port: ${port}`)
 
 connectDb(`${MONGO_URI}`).catch((err: Error) =>
-  logger.error(`${err.message} - ${err.cause}`)
+  logger.error(`${err.message}`, err)
 )
 app.use(express.json())
 

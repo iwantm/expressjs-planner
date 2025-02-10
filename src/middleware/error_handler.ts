@@ -7,7 +7,8 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  logger.error(`${err.message} - ${err.cause}`)
+  logger.error({ message: err.message, cause: err.cause })
+
   res.status(500).json({ error: 'Internal Server Error' })
   next()
 }

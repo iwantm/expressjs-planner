@@ -16,7 +16,6 @@ const TaskSchema = new Schema<Task>(
     projectId: {
       type: Schema.Types.ObjectId,
       ref: 'Project',
-      required: false,
     },
     title: { type: String, required: true },
     description: { type: String, required: false },
@@ -32,7 +31,17 @@ const TaskSchema = new Schema<Task>(
     },
     dueDate: Date,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 )
+
+TaskSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'parent',
+})
 
 export const TaskModel = model<Task>('Task', TaskSchema)
