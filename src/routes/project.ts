@@ -11,9 +11,9 @@ import {
 
 export const projectRouter = Router()
 
-projectRouter.get('/', getProjects)
-projectRouter.get('/:id', getProjectById)
-projectRouter.post('/', createProject)
-projectRouter.post('/:id/comment', commentProject)
-projectRouter.delete('/:id', deleteProject)
-projectRouter.put('/:id', updateProject)
+projectRouter.get('/:userId', getProjects)
+projectRouter.get('/:userId/:id', getProjectById)
+projectRouter.post('/:userId', createProject)
+projectRouter.post('/:userId/:id/comment', commentProject)
+projectRouter.delete('/:userId/:id', deleteProject)
+projectRouter.put('/:userId/:id', updateProject)

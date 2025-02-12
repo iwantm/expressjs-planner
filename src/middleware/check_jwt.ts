@@ -1,5 +1,6 @@
 import { expressjwt, type GetVerificationKey } from 'express-jwt'
 import { expressJwtSecret } from 'jwks-rsa'
+import { AuthorizationError } from '../models'
 
 export const checkJwt = (domain: string, audience: string) => {
   const express = expressjwt({
@@ -12,6 +13,9 @@ export const checkJwt = (domain: string, audience: string) => {
     audience: audience,
     issuer: `https://${domain}/`,
     algorithms: ['RS256'],
+    onExpired: () => {
+      throw new AuthorizationError('Token expired.')
+    },
   })
   return express
 }

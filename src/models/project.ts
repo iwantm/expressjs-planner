@@ -6,6 +6,7 @@ interface Project {
   status: 'To Do' | 'In Progress' | 'Complete' | 'Abandoned'
   priority: 'Low' | 'Medium' | 'High' | 'Should be done'
   dueDate: Date
+  userId: string
   createdAt: Date
   updatedAt: Date
 }
@@ -23,6 +24,10 @@ const ProjectSchema = new Schema<Project>(
       type: String,
       enum: ['Low', 'Medium', 'High', 'Should be done'],
       default: 'Low',
+    },
+    userId: {
+      type: String,
+      required: true,
     },
     dueDate: Date,
   },

@@ -7,7 +7,7 @@ export async function getProjects(
   next: NextFunction
 ) {
   try {
-    const projects = await ProjectModel.find()
+    const projects = await ProjectModel.find({ userId: req.params.userId })
 
     res.json(projects)
   } catch (e) {
@@ -23,7 +23,10 @@ export async function getProjectById(
   next: NextFunction
 ) {
   try {
-    const project = await ProjectModel.findById(req.params.id)
+    const project = await ProjectModel.findOne({
+      userId: req.params.userId,
+      _id: req.params.id,
+    })
       .populate('tasks')
       .populate('comments')
 
@@ -47,7 +50,7 @@ export async function createProject(
   next: NextFunction
 ) {
   try {
-    const project = new ProjectModel(req.body)
+    const project = new ProjectModel({ userId: req.params.userId, ...req.body })
     await project.save()
 
     res.status(201).json(project)
@@ -64,8 +67,8 @@ export async function updateProject(
   next: NextFunction
 ) {
   try {
-    const project = await ProjectModel.findByIdAndUpdate(
-      req.params.id,
+    const project = await ProjectModel.findOneAndUpdate(
+      { _id: req.params.id, userId: req.params.userId },
       req.body,
       {
         new: true,
@@ -93,7 +96,10 @@ export async function deleteProject(
   next: NextFunction
 ) {
   try {
-    await ProjectModel.findByIdAndDelete(req.params.id)
+    await ProjectModel.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.params.userId,
+    })
 
     res.json({ message: `Project with id ${req.params.id} deleted.` })
   } catch (e) {
@@ -116,7 +122,10 @@ export async function commentProject(
   next: NextFunction
 ) {
   try {
-    const project = await ProjectModel.findById(req.params.id)
+    const project = await ProjectModel.findOne({
+      _id: req.params.id,
+      userId: req.params.userId,
+    })
 
     const comment = new CommentModel({
       parentType: 'Project',
