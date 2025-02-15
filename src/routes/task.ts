@@ -10,9 +10,9 @@ import {
 
 export const taskRouter = Router()
 
-taskRouter.get('/', getTasks)
+taskRouter.get('/:projectId', getTasks)
 taskRouter.get('/:id', getTaskById)
-taskRouter.post('/', createTask)
+taskRouter.post('/:projectId', createTask)
 taskRouter.post('/:id/comment', commentTask)
 taskRouter.delete('/:id', deleteTask)
 taskRouter.put('/:id', updateTask)

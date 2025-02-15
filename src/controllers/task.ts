@@ -7,7 +7,7 @@ export async function getTasks(
   next: NextFunction
 ) {
   try {
-    const tasks = await TaskModel.find()
+    const tasks = await TaskModel.find({ projectId: req.params.projectId })
 
     res.json(tasks)
   } catch (e) {
@@ -45,7 +45,7 @@ export async function createTask(
   next: NextFunction
 ) {
   try {
-    const task = new TaskModel(req.body)
+    const task = new TaskModel({ projectId: req.params.projectId, ...req.body })
     await task.save()
 
     res.status(201).json(task)
