@@ -16,11 +16,6 @@ connectDb(`${mongoUri}`).catch((err: Error) =>
   logger.error(`${err.message}`, err)
 )
 app.use(express.json())
-app.use((req, res, next) => {
-  console.log('Requesting:', req.method, req.url)
-  next()
-})
-
 app.use(checkJwt(auth0Domain, auth0Audience))
 
 app.use('/api/tasks', taskRouter)
